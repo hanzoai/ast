@@ -1,0 +1,44 @@
+{
+  "name": "@hanzo/ast",
+  "version": "1.0.0",
+  "description": "Structured AI training data collection — captures interactions, feedback, and model outputs for AI model training pipelines.",
+  "author": "Hanzo AI, Inc. <eng@hanzo.ai>",
+  "license": "MIT",
+  "homepage": "https://hanzo.ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hanzoai/ast.git"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "browser": "./dist/browser.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "import": "./dist/browser.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "ai",
+    "training-data",
+    "analytics",
+    "feedback",
+    "hanzo"
+  ]
+}
