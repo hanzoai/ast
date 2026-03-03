@@ -13,6 +13,6 @@ export default defineConfig([
     format: ['esm'],
     dts: true,
     minify: true,
-    target: 'es2020',
+    target: 'esnext',
   },
 ]);
