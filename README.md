@@ -1,3 +1,5 @@
+<p align="center"><img src=".github/hero.svg" alt="ast" width="880"></p>
+
 # tree-sitter
 
 [![DOI](https://zenodo.org/badge/14164618.svg)](https://zenodo.org/badge/latestdoi/14164618)
