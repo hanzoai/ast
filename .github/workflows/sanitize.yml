@@ -9,7 +9,7 @@ on:
 
 jobs:
   check-undefined-behaviour:
-    runs-on: ubuntu-latest
+    runs-on: hanzo-build-linux-amd64
     timeout-minutes: 20
     env:
       TREE_SITTER: ${{ github.workspace }}/target/release/tree-sitter

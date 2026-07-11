@@ -14,7 +14,7 @@ jobs:
 
   release:
     name: Release on GitHub
-    runs-on: ubuntu-latest
+    runs-on: hanzo-build-linux-amd64
     needs: build
     permissions:
       contents: write
@@ -57,7 +57,7 @@ jobs:
 
   crates_io:
     name: Publish packages to Crates.io
-    runs-on: ubuntu-latest
+    runs-on: hanzo-build-linux-amd64
     needs: release
     steps:
       - name: Checkout repository
@@ -73,7 +73,7 @@ jobs:
 
   npm:
     name: Publish packages to npmjs.com
-    runs-on: ubuntu-latest
+    runs-on: hanzo-build-linux-amd64
     needs: release
     strategy:
       fail-fast: false

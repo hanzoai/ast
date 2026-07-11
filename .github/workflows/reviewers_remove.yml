@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   remove-reviewers:
-    runs-on: ubuntu-latest
+    runs-on: hanzo-build-linux-amd64
     steps:
       - name: Checkout script
         uses: actions/checkout@v4

@@ -14,7 +14,7 @@ jobs:
   close:
     name: Close issues with no response
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
+    runs-on: hanzo-build-linux-amd64
     steps:
       - name: Checkout script
         uses: actions/checkout@v4
@@ -32,7 +32,7 @@ jobs:
   remove_label:
     name: Remove response label
     if: github.event_name == 'issue_comment'
-    runs-on: ubuntu-latest
+    runs-on: hanzo-build-linux-amd64
     steps:
       - name: Checkout script
         uses: actions/checkout@v4
