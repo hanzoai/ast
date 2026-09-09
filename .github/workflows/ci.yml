@@ -1,57 +1,84 @@
 name: CI
 
 on:
-  pull_request:
-    paths-ignore:
-      - docs/**
-      - "**/README.md"
-      - CONTRIBUTING.md
-      - LICENSE
-      - cli/src/templates
   push:
     branches: [master]
-    paths-ignore:
-      - docs/**
-      - "**/README.md"
-      - CONTRIBUTING.md
-      - LICENSE
-      - cli/src/templates
+  pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name != 'push' }}
 
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  CARGO_NET_RETRY: 10
+  RUSTUP_MAX_RETRIES: 10
+
 jobs:
-  checks:
-    runs-on: ubuntu-latest
+  c:
+    name: C library
+    runs-on: [hanzo-build-linux-amd64]
+    env:
+      CFLAGS: -g -Werror -Wall -Wextra -Wshadow -Wpedantic -Werror=incompatible-pointer-types
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up stable Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: stable
-          components: clippy, rustfmt
-
-      - name: Set up nightly Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: nightly
-          components: clippy, rustfmt
-
-      - name: Lint files
+      - name: Install clang and cmake
         run: |
-          make lint
-          make lint-web
+          apt-get update -qq
+          apt-get install -y --no-install-recommends clang cmake
 
-      - name: Lint files (Rust nightly)
-        continue-on-error: true
+      - name: Build with make
+        run: make -j CFLAGS="$CFLAGS"
+
+      - name: Build with cmake
+        env:
+          CC: clang
         run: |
-          make lint-nightly
+          cmake -S lib -B build/static \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_COMPILE_WARNING_AS_ERROR=ON \
+            -DTREE_SITTER_FEATURE_WASM=OFF
+          cmake --build build/static --verbose
 
-  sanitize:
-    uses: ./.github/workflows/sanitize.yml
+          cmake -S lib -B build/shared \
+            -DBUILD_SHARED_LIBS=ON \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_COMPILE_WARNING_AS_ERROR=ON \
+            -DTREE_SITTER_FEATURE_WASM=OFF
+          cmake --build build/shared --verbose
 
-  build:
-    uses: ./.github/workflows/build.yml
+  rust:
+    name: CLI and tests
+    runs-on: [hanzo-build-linux-amd64]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs |
+            sh -s -- -y --profile minimal --default-toolchain stable
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+
+      - name: Check the no_std build
+        run: cargo check --no-default-features
+        working-directory: lib
+
+      - name: Build the CLI
+        run: cargo build --release
+
+      - name: Fetch grammar fixtures
+        run: cargo run -p xtask -- fetch-fixtures
+
+      - name: Generate grammar fixtures
+        run: cargo run -p xtask -- generate-fixtures
+
+      - name: Run tests
+        run: |
+          export TREE_SITTER="$PWD/target/release/tree-sitter"
+          cargo test
